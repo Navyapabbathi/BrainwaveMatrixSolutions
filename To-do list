@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #d8bfd8;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* Add transparency to the container background */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 40px; /* Adjust the size as needed */
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .buttons button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .task-list li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .task-list li.completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .task-list li input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .task-list li .edit,
+        .task-list li .delete {
+            background-color: #ffc107;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 10px;
+        }
+
+        .task-list li .edit:hover,
+        .task-list li .delete:hover {
+            background-color: #e0a800;
+        }
+
+        .task-list li .date {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="C:\Users\deepi\OneDrive\Pictures\todo logo 1.jpeg" alt="To-Do List Logo" class="logo"> <!-- Replace 'logo.png' with your logo file -->
+            <h1>To-Do List</h1>
+        </div>
+        <input type="text" id="taskInput" placeholder="Add a New Task + Enter" onkeypress="if(event.key === 'Enter') addTask()">
+        <div class="buttons">
+            <button onclick="clearAll()">Clear All</button>
+        </div>
+        <ul id="taskList" class="task-list"></ul>
+    </div>
+    <script>
+        let tasks = [];
+        const colors = ['#FFB6C1', '#FF69B4', '#DB7093', '#C71585', '#FF1493', '#FF69B4'];
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            if (taskInput.value.trim() === '') {
+                alert('Please enter a task');
+                return;
+            }
+
+            const task = {
+                id: Date.now(),
+                text: taskInput.value,
+                completed: false,
+                date: new Date()
+            };
+            tasks.push(task);
+            taskInput.value = '';
+            renderTasks();
+        }
+
+        function toggleTaskCompletion(taskId) {
+            const task = tasks.find(task => task.id === taskId);
+            task.completed = !task.completed;
+            renderTasks();
+        }
+
+        function editTask(taskId) {
+            const newTaskText = prompt('Edit your task:');
+            if (newTaskText) {
+                const task = tasks.find(task => task.id === taskId);
+                task.text = newTaskText;
+                renderTasks();
+            }
+        }
+
+        function deleteTask(taskId) {
+            tasks = tasks.filter(task => task.id !== taskId);
+            renderTasks();
+        }
+
+        function clearAll() {
+            tasks = [];
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = task.completed ? 'completed' : '';
+                li.style.backgroundColor = colors[index % colors.length];
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.completed;
+                checkbox.onclick = () => toggleTaskCompletion(task.id);
+
+                const taskText = document.createTextNode(task.text);
+
+                const editButton = document.createElement('button');
+                editButton.className = 'edit';
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => editTask(task.id);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete';
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteTask(task.id);
+
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'date';
+                dateSpan.textContent = `${task.date.toLocaleDateString()} - ${task.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+                li.appendChild(checkbox);
+                li.appendChild(taskText);
+                li.appendChild(editButton);
+                li.appendChild(deleteButton);
+                li.appendChild(dateSpan);
+
+                taskList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
